@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>REKUT Studio — Video Editing & Web Development</title>
 <meta name="description" content="REKUT Studio — Every cut should have a purpose. Video editing and web development for creators, brands and businesses.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -31,7 +31,11 @@
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
-html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+html{
+  scroll-behavior:smooth;
+  -webkit-text-size-adjust:100%;
+  overflow-x:hidden;
+}
 
 body{
   background:var(--bg);
@@ -41,6 +45,7 @@ body{
   line-height:1.65;
   font-weight:400;
   overflow-x:hidden;
+  width:100%;
   -webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing:grayscale;
 }
@@ -152,11 +157,12 @@ body.loaded #preloader{opacity:0;visibility:hidden}
 .pre-logo i{
   position:absolute;left:-14%;top:50%;width:128%;height:4px;background:var(--red);
   border-radius:4px;transform-origin:left center;
-  transform:rotate(-33deg) scaleX(0);
+  /* CHANGED: Rotation to -40deg for bottom-left to top-right cut */
+  transform:rotate(-40deg) scaleX(0);
   box-shadow:0 0 22px rgba(255,59,47,.8);
   animation:slashDraw .85s var(--ease) .25s forwards;
 }
-@keyframes slashDraw{to{transform:rotate(-33deg) scaleX(1)}}
+@keyframes slashDraw{to{transform:rotate(-40deg) scaleX(1)}}
 
 .pre-bar{width:180px;height:1px;background:rgba(255,255,255,.1);overflow:hidden}
 .pre-bar i{display:block;height:100%;width:100%;background:var(--red);transform-origin:left;
@@ -210,7 +216,9 @@ body.loaded #preloader{opacity:0;visibility:hidden}
 }
 .logo-mark i{
   position:absolute;left:-15%;top:52%;width:130%;height:2.6px;background:var(--red);
-  border-radius:3px;transform:rotate(-33deg);
+  border-radius:3px;
+  /* CHANGED: Rotation to -40deg for bottom-left to top-right cut */
+  transform:rotate(-40deg);
   box-shadow:0 0 14px rgba(255,59,47,.85);
 }
 .logo-text{
@@ -235,16 +243,11 @@ body.loaded #preloader{opacity:0;visibility:hidden}
 .nav-links a:hover::after{transform:scaleX(1)}
 
 .nav-actions{display:flex;align-items:center;gap:10px}
-.login-link{
-  font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
-  padding:9px 12px;transition:color .35s;border-right:1px solid var(--line);
-  margin-right:6px;
-}
-.login-link:hover{color:var(--fg)}
 
 .burger{
   display:none;width:42px;height:42px;position:relative;
   border:1px solid var(--line-2);border-radius:2px;
+  align-items:center;justify-content:center;
 }
 .burger span{
   position:absolute;left:11px;width:20px;height:1.5px;background:var(--fg);
@@ -265,7 +268,8 @@ body.loaded #preloader{opacity:0;visibility:hidden}
 .mobile-menu.open{clip-path:inset(0 0 0 0)}
 .mobile-menu a.m-link{
   font-family:'Syne';font-weight:800;text-transform:uppercase;
-  font-size:clamp(2rem,9vw,3.2rem);letter-spacing:-.03em;line-height:1.25;
+  font-size:clamp(1.8rem,8vw,2.8rem);
+  letter-spacing:-.03em;line-height:1.25;
   color:#eaeaf0;opacity:0;transform:translateY(28px);
   transition:opacity .6s var(--ease),transform .6s var(--ease),color .3s;
   border-bottom:1px solid var(--line);padding:12px 0;
@@ -278,11 +282,17 @@ body.loaded #preloader{opacity:0;visibility:hidden}
 
 @media (max-width:1080px){
   .nav-links{display:none}
-  .login-link{display:none}
-  .burger{display:block}
+  .burger{display:flex}
 }
 @media (max-width:560px){
   .nav-actions .btn-red{display:none}
+  .hero-cta {
+    flex-direction: column;
+    width: 100%;
+  }
+  .hero-cta .btn {
+    width: 100%;
+  }
 }
 
 /* ============================================================
@@ -318,7 +328,7 @@ body.loaded #preloader{opacity:0;visibility:hidden}
 .hero .eyebrow{margin-bottom:28px}
 
 .hero-title{
-  font-size:clamp(2.7rem,9.2vw,8.6rem);
+  font-size:clamp(2.2rem, 9vw, 8.6rem);
   max-width:16ch;
 }
 .hero-title .w{position:relative;display:inline-block}
@@ -327,6 +337,7 @@ body.loaded #preloader{opacity:0;visibility:hidden}
   content:'';position:absolute;left:-2%;right:-2%;top:54%;height:.055em;
   background:var(--red);border-radius:4px;
   box-shadow:0 0 26px rgba(255,59,47,.75);
+  /* CHANGED: Rotation to -2deg for bottom-left to top-right cut */
   transform:rotate(-2deg) scaleX(0);transform-origin:left;
   transition:transform 1s var(--ease) 1.15s;
 }
@@ -347,13 +358,13 @@ body.loaded .hero-title .strike::after{transform:rotate(-2deg) scaleX(1)}
 .hero-slash{
   position:absolute;z-index:3;left:50%;top:50%;
   width:min(1100px,120vw);height:2px;background:linear-gradient(90deg,transparent,var(--red) 22%,var(--red) 78%,transparent);
-  transform:translate(-50%,-50%) rotate(-19deg) scaleX(0);
+  transform:translate(-50%,-50%) rotate(19deg) scaleX(0);
   transform-origin:center;
   box-shadow:0 0 40px rgba(255,59,47,.55);
   opacity:.5;pointer-events:none;
   transition:transform 1.5s var(--ease) .5s, opacity 1s var(--ease) 1s;
 }
-body.loaded .hero-slash{transform:translate(-50%,-50%) rotate(-19deg) scaleX(1);opacity:.28}
+body.loaded .hero-slash{transform:translate(-50%,-50%) rotate(19deg) scaleX(1);opacity:.28}
 
 .hero-scroll{
   position:absolute;left:50%;bottom:34px;transform:translateX(-50%);
@@ -873,7 +884,6 @@ footer{border-top:1px solid var(--line);padding:clamp(60px,8vw,110px) 0 40px;bac
     </nav>
 
     <div class="nav-actions">
-      <a href="#contact" class="login-link">Client Login</a>
       <a href="#contact" class="btn btn-red btn-sm"><span>Start a Project</span></a>
       <button class="burger" id="burger" aria-label="Menu"><span></span><span></span></button>
     </div>
@@ -890,8 +900,7 @@ footer{border-top:1px solid var(--line);padding:clamp(60px,8vw,110px) 0 40px;bac
   <a href="#testimonials" class="m-link"><small>06</small>Testimonials</a>
   <a href="#contact" class="m-link"><small>07</small>Contact</a>
   <div class="mobile-foot">
-    <span>Client Login</span>
-    <span>hello@rekutstudio.com</span>
+    <span>rekut.studio@gmail.com</span>
   </div>
 </div>
 
@@ -907,8 +916,7 @@ footer{border-top:1px solid var(--line);padding:clamp(60px,8vw,110px) 0 40px;bac
 
     <h1 class="hero-title display">
       <span class="mask"><span>We Cut</span></span>
-      <span class="mask"><span>What <em class="strike" style="font-style:normal">Doesn't</em></span></span>
-      <span class="mask"><span class="accent">Matter.</span></span>
+      <span class="mask"><span class="accent">Different.</span></span>
     </h1>
 
     <p class="hero-sub hero-fade f2">Video editing and digital experiences built to hold attention.</p>
@@ -1222,7 +1230,7 @@ footer{border-top:1px solid var(--line);padding:clamp(60px,8vw,110px) 0 40px;bac
         </p>
 
         <div class="contact-info">
-          <div class="info-row"><span>Email</span><a href="mailto:hello@rekutstudio.com">hello@rekutstudio.com</a></div>
+          <div class="info-row"><span>Email</span><a href="mailto:rekut.studio@gmail.com">rekut.studio@gmail.com</a></div>
           <div class="info-row"><span>Response Time</span><p>Usually within a few hours</p></div>
           <div class="info-row"><span>Availability</span><p>Taking on new projects</p></div>
         </div>
@@ -1293,7 +1301,6 @@ footer{border-top:1px solid var(--line);padding:clamp(60px,8vw,110px) 0 40px;bac
         <a href="#contact">Instagram</a>
         <a href="#contact">YouTube</a>
         <a href="#contact">LinkedIn</a>
-        <a href="#contact">Client Login</a>
       </div>
     </div>
 
@@ -1335,7 +1342,6 @@ footer{border-top:1px solid var(--line);padding:clamp(60px,8vw,110px) 0 40px;bac
 window.addEventListener('load', () => {
   setTimeout(() => document.body.classList.add('loaded'), 1350);
 });
-/* Fallback if load never fires */
 setTimeout(() => document.body.classList.add('loaded'), 3500);
 
 
@@ -1687,7 +1693,7 @@ document.querySelectorAll('.tilt').forEach(bindTilt);
     pos[i*3 + 2] = (Math.random() - 0.5) * 1000;
 
     if (Math.random() > 0.93){
-      col[i*3] = 1.0; col[i*3+1] = 0.23; col[i*3+2] = 0.18;   // red sparks
+      col[i*3] = 1.0; col[i*3+1] = 0.23; col[i*3+2] = 0.18;
     } else {
       const g = 0.35 + Math.random() * 0.55;
       col[i*3] = g; col[i*3+1] = g; col[i*3+2] = g;
@@ -1740,7 +1746,6 @@ document.querySelectorAll('.tilt').forEach(bindTilt);
     renderer.setSize(innerWidth, innerHeight);
   });
 
-  /* Pause rendering when hero is off-screen */
   let visible = true;
   new IntersectionObserver(entries => {
     visible = entries[0].isIntersecting;
