@@ -1,0 +1,1795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>REKUT Studio — Video Editing & Web Development</title>
+<meta name="description" content="REKUT Studio — Every cut should have a purpose. Video editing and web development for creators, brands and businesses.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   TOKENS
+   ============================================================ */
+:root{
+  --bg:#050506;
+  --bg-2:#0a0a0d;
+  --surface:#0e0e12;
+  --surface-2:#131318;
+  --line:rgba(255,255,255,.08);
+  --line-2:rgba(255,255,255,.16);
+  --fg:#f2f2f4;
+  --muted:#8c8c97;
+  --muted-2:#5e5e68;
+  --red:#ff3b2f;
+  --red-soft:rgba(255,59,47,.14);
+  --ease:cubic-bezier(.22,1,.36,1);
+  --ease-2:cubic-bezier(.65,0,.35,1);
+  --nav-h:82px;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+
+body{
+  background:var(--bg);
+  color:var(--fg);
+  font-family:'Inter',system-ui,-apple-system,sans-serif;
+  font-size:16px;
+  line-height:1.65;
+  font-weight:400;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+
+body.locked{overflow:hidden}
+
+img,svg,video{display:block;max-width:100%}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+::selection{background:var(--red);color:#fff}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:9px}
+::-webkit-scrollbar-track{background:#08080a}
+::-webkit-scrollbar-thumb{background:#242429;border-radius:9px}
+::-webkit-scrollbar-thumb:hover{background:var(--red)}
+
+/* ============================================================
+   TYPE / LAYOUT UTILITIES
+   ============================================================ */
+.container{width:min(1380px,100%);margin-inline:auto;padding-inline:clamp(20px,5vw,64px)}
+
+.display{
+  font-family:'Syne',sans-serif;
+  font-weight:800;
+  line-height:.92;
+  letter-spacing:-.035em;
+  text-transform:uppercase;
+}
+
+.eyebrow{
+  display:inline-flex;align-items:center;gap:12px;
+  font-size:11px;font-weight:500;letter-spacing:.3em;
+  text-transform:uppercase;color:var(--muted);
+}
+.eyebrow::before{
+  content:'';width:26px;height:1px;background:var(--red);
+  box-shadow:0 0 10px rgba(255,59,47,.8);
+}
+
+.section{padding:clamp(90px,12vw,180px) 0;position:relative}
+.section-head{margin-bottom:clamp(48px,6vw,90px)}
+.section-title{font-size:clamp(2.3rem,6.4vw,5.4rem);margin-top:22px}
+.section-sub{color:var(--muted);max-width:52ch;margin-top:22px;font-size:clamp(.95rem,1.4vw,1.08rem)}
+.accent{color:var(--red)}
+
+/* Reveal on scroll */
+.reveal{opacity:0;transform:translateY(42px);transition:opacity 1.05s var(--ease),transform 1.05s var(--ease)}
+.reveal.in{opacity:1;transform:none}
+.reveal.d1{transition-delay:.08s}
+.reveal.d2{transition-delay:.16s}
+.reveal.d3{transition-delay:.24s}
+.reveal.d4{transition-delay:.32s}
+
+/* Line mask reveal */
+.mask{display:block;overflow:hidden}
+.mask > span{display:block;transform:translateY(115%);transition:transform 1.15s var(--ease)}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.btn{
+  position:relative;
+  display:inline-flex;align-items:center;justify-content:center;gap:10px;
+  padding:15px 30px;
+  font-size:12.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;
+  border-radius:2px;
+  overflow:hidden;
+  transition:transform .45s var(--ease),color .4s var(--ease),border-color .4s var(--ease);
+  white-space:nowrap;
+}
+.btn:hover{transform:translateY(-2px)}
+
+.btn-red{background:var(--red);color:#fff;box-shadow:0 0 0 rgba(255,59,47,0)}
+.btn-red::before{
+  content:'';position:absolute;inset:0;background:#fff;
+  transform:translateY(101%);transition:transform .55s var(--ease);z-index:0;
+}
+.btn-red:hover::before{transform:translateY(0)}
+.btn-red:hover{color:#050506;box-shadow:0 14px 40px -12px rgba(255,59,47,.7)}
+.btn-red span{position:relative;z-index:1}
+
+.btn-outline{border:1px solid var(--line-2);color:var(--fg)}
+.btn-outline::before{
+  content:'';position:absolute;inset:0;background:var(--fg);
+  transform:translateY(101%);transition:transform .55s var(--ease);z-index:0;
+}
+.btn-outline:hover::before{transform:translateY(0)}
+.btn-outline:hover{color:#050506;border-color:var(--fg)}
+.btn-outline span{position:relative;z-index:1}
+
+.btn-sm{padding:11px 20px;font-size:11px}
+
+/* ============================================================
+   PRELOADER
+   ============================================================ */
+#preloader{
+  position:fixed;inset:0;z-index:9999;
+  background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;
+  transition:opacity .9s var(--ease),visibility .9s;
+}
+body.loaded #preloader{opacity:0;visibility:hidden}
+
+.pre-logo{
+  font-family:'Syne';font-weight:800;font-size:64px;letter-spacing:-.05em;
+  position:relative;line-height:1;
+}
+.pre-logo i{
+  position:absolute;left:-14%;top:50%;width:128%;height:4px;background:var(--red);
+  border-radius:4px;transform-origin:left center;
+  transform:rotate(-33deg) scaleX(0);
+  box-shadow:0 0 22px rgba(255,59,47,.8);
+  animation:slashDraw .85s var(--ease) .25s forwards;
+}
+@keyframes slashDraw{to{transform:rotate(-33deg) scaleX(1)}}
+
+.pre-bar{width:180px;height:1px;background:rgba(255,255,255,.1);overflow:hidden}
+.pre-bar i{display:block;height:100%;width:100%;background:var(--red);transform-origin:left;
+  transform:scaleX(0);animation:load 1.5s var(--ease) .15s forwards}
+@keyframes load{to{transform:scaleX(1)}}
+
+/* ============================================================
+   CUSTOM CURSOR
+   ============================================================ */
+.cursor,.cursor-dot{position:fixed;top:0;left:0;pointer-events:none;z-index:9998;border-radius:50%}
+.cursor{
+  width:34px;height:34px;border:1px solid rgba(255,255,255,.4);
+  margin:-17px 0 0 -17px;
+  transition:width .35s var(--ease),height .35s var(--ease),margin .35s var(--ease),
+             background .35s var(--ease),border-color .35s var(--ease),opacity .3s;
+}
+.cursor.grow{
+  width:78px;height:78px;margin:-39px 0 0 -39px;
+  background:rgba(255,59,47,.12);border-color:var(--red);
+}
+.cursor-dot{width:5px;height:5px;background:var(--red);margin:-2.5px 0 0 -2.5px}
+@media (hover:hover) and (pointer:fine){ body{cursor:none} a,button{cursor:none} }
+@media (hover:none),(pointer:coarse){ .cursor,.cursor-dot{display:none} }
+
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
+.nav{
+  position:fixed;top:0;left:0;width:100%;z-index:900;
+  height:var(--nav-h);
+  display:flex;align-items:center;
+  transition:height .5s var(--ease),background .5s var(--ease),backdrop-filter .5s var(--ease),border-color .5s var(--ease);
+  border-bottom:1px solid transparent;
+}
+.nav.scrolled{
+  height:68px;
+  background:rgba(5,5,6,.72);
+  -webkit-backdrop-filter:blur(18px) saturate(140%);
+  backdrop-filter:blur(18px) saturate(140%);
+  border-bottom-color:var(--line);
+}
+.nav-inner{
+  width:min(1380px,100%);margin-inline:auto;padding-inline:clamp(20px,5vw,64px);
+  display:flex;align-items:center;justify-content:space-between;gap:26px;
+}
+
+.logo{display:flex;align-items:center;gap:11px;flex-shrink:0}
+.logo-mark{
+  position:relative;font-family:'Syne';font-weight:800;font-size:27px;
+  letter-spacing:-.06em;line-height:1;
+}
+.logo-mark i{
+  position:absolute;left:-15%;top:52%;width:130%;height:2.6px;background:var(--red);
+  border-radius:3px;transform:rotate(-33deg);
+  box-shadow:0 0 14px rgba(255,59,47,.85);
+}
+.logo-text{
+  font-family:'Syne';font-weight:700;font-size:15px;letter-spacing:.06em;
+  display:flex;flex-direction:column;line-height:1.05;
+}
+.logo-text em{
+  font-style:normal;font-size:8.5px;letter-spacing:.42em;color:var(--muted);font-weight:500;
+}
+
+.nav-links{display:flex;align-items:center;gap:6px}
+.nav-links a{
+  position:relative;padding:9px 14px;font-size:12.5px;font-weight:500;
+  letter-spacing:.06em;color:#c9c9d1;transition:color .35s var(--ease);
+}
+.nav-links a::after{
+  content:'';position:absolute;left:14px;right:14px;bottom:4px;height:1px;
+  background:var(--red);transform:scaleX(0);transform-origin:left;
+  transition:transform .45s var(--ease);
+}
+.nav-links a:hover{color:#fff}
+.nav-links a:hover::after{transform:scaleX(1)}
+
+.nav-actions{display:flex;align-items:center;gap:10px}
+.login-link{
+  font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);
+  padding:9px 12px;transition:color .35s;border-right:1px solid var(--line);
+  margin-right:6px;
+}
+.login-link:hover{color:var(--fg)}
+
+.burger{
+  display:none;width:42px;height:42px;position:relative;
+  border:1px solid var(--line-2);border-radius:2px;
+}
+.burger span{
+  position:absolute;left:11px;width:20px;height:1.5px;background:var(--fg);
+  transition:transform .45s var(--ease),opacity .3s;
+}
+.burger span:nth-child(1){top:16px}
+.burger span:nth-child(2){top:24px}
+.burger.open span:nth-child(1){transform:translateY(4px) rotate(45deg)}
+.burger.open span:nth-child(2){transform:translateY(-4px) rotate(-45deg)}
+
+/* Mobile menu */
+.mobile-menu{
+  position:fixed;inset:0;z-index:880;background:#070709;
+  display:flex;flex-direction:column;justify-content:center;
+  padding:100px clamp(24px,7vw,60px) 50px;
+  clip-path:inset(0 0 100% 0);transition:clip-path .8s var(--ease);
+}
+.mobile-menu.open{clip-path:inset(0 0 0 0)}
+.mobile-menu a.m-link{
+  font-family:'Syne';font-weight:800;text-transform:uppercase;
+  font-size:clamp(2rem,9vw,3.2rem);letter-spacing:-.03em;line-height:1.25;
+  color:#eaeaf0;opacity:0;transform:translateY(28px);
+  transition:opacity .6s var(--ease),transform .6s var(--ease),color .3s;
+  border-bottom:1px solid var(--line);padding:12px 0;
+  display:flex;align-items:baseline;gap:14px;
+}
+.mobile-menu a.m-link small{font-size:11px;color:var(--red);letter-spacing:.2em;font-family:'Inter'}
+.mobile-menu a.m-link:hover{color:var(--red)}
+.mobile-menu.open a.m-link{opacity:1;transform:none}
+.mobile-foot{margin-top:44px;display:flex;gap:20px;flex-wrap:wrap;color:var(--muted);font-size:12px;letter-spacing:.14em;text-transform:uppercase}
+
+@media (max-width:1080px){
+  .nav-links{display:none}
+  .login-link{display:none}
+  .burger{display:block}
+}
+@media (max-width:560px){
+  .nav-actions .btn-red{display:none}
+}
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.hero{
+  position:relative;min-height:100svh;
+  display:flex;align-items:center;
+  padding-top:calc(var(--nav-h) + 40px);padding-bottom:80px;
+  overflow:hidden;
+  background:
+    radial-gradient(120% 80% at 78% 22%, rgba(255,59,47,.10), transparent 58%),
+    radial-gradient(90% 70% at 12% 88%, rgba(90,110,255,.07), transparent 60%),
+    #050506;
+}
+#hero-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:1;opacity:.85}
+
+.hero-grid{
+  position:absolute;inset:0;z-index:0;opacity:.5;
+  background-image:
+    linear-gradient(rgba(255,255,255,.028) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.028) 1px, transparent 1px);
+  background-size:96px 96px;
+  -webkit-mask-image:radial-gradient(ellipse at 50% 45%, #000 20%, transparent 78%);
+  mask-image:radial-gradient(ellipse at 50% 45%, #000 20%, transparent 78%);
+}
+.hero-vignette{
+  position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:radial-gradient(120% 100% at 50% 50%, transparent 40%, rgba(5,5,6,.85) 100%);
+}
+.hero-inner{position:relative;z-index:5;width:100%}
+
+.hero .eyebrow{margin-bottom:28px}
+
+.hero-title{
+  font-size:clamp(2.7rem,9.2vw,8.6rem);
+  max-width:16ch;
+}
+.hero-title .w{position:relative;display:inline-block}
+.hero-title .strike{position:relative}
+.hero-title .strike::after{
+  content:'';position:absolute;left:-2%;right:-2%;top:54%;height:.055em;
+  background:var(--red);border-radius:4px;
+  box-shadow:0 0 26px rgba(255,59,47,.75);
+  transform:rotate(-2deg) scaleX(0);transform-origin:left;
+  transition:transform 1s var(--ease) 1.15s;
+}
+body.loaded .hero-title .strike::after{transform:rotate(-2deg) scaleX(1)}
+
+.hero-sub{
+  margin-top:32px;font-size:clamp(1rem,2vw,1.3rem);
+  color:#d3d3db;font-weight:300;max-width:30ch;line-height:1.5;
+}
+.hero-desc{
+  margin-top:18px;color:var(--muted);max-width:50ch;
+  font-size:clamp(.9rem,1.3vw,1rem);
+}
+
+.hero-cta{display:flex;gap:14px;margin-top:44px;flex-wrap:wrap}
+
+/* animated slash across hero */
+.hero-slash{
+  position:absolute;z-index:3;left:50%;top:50%;
+  width:min(1100px,120vw);height:2px;background:linear-gradient(90deg,transparent,var(--red) 22%,var(--red) 78%,transparent);
+  transform:translate(-50%,-50%) rotate(-19deg) scaleX(0);
+  transform-origin:center;
+  box-shadow:0 0 40px rgba(255,59,47,.55);
+  opacity:.5;pointer-events:none;
+  transition:transform 1.5s var(--ease) .5s, opacity 1s var(--ease) 1s;
+}
+body.loaded .hero-slash{transform:translate(-50%,-50%) rotate(-19deg) scaleX(1);opacity:.28}
+
+.hero-scroll{
+  position:absolute;left:50%;bottom:34px;transform:translateX(-50%);
+  z-index:6;display:flex;flex-direction:column;align-items:center;gap:12px;
+  font-size:9.5px;letter-spacing:.35em;text-transform:uppercase;color:var(--muted-2);
+}
+.hero-scroll i{
+  width:1px;height:52px;background:linear-gradient(180deg,var(--red),transparent);
+  animation:scrollPulse 2.4s var(--ease) infinite;
+  transform-origin:top;
+}
+@keyframes scrollPulse{0%{transform:scaleY(0);opacity:0}40%{transform:scaleY(1);opacity:1}100%{transform:scaleY(1);opacity:0}}
+
+/* Hero entrance */
+.hero .mask > span{transition-delay:0s}
+body.loaded .hero .mask > span{transform:translateY(0)}
+body.loaded .hero .mask:nth-child(1) > span{transition-delay:.10s}
+body.loaded .hero .mask:nth-child(2) > span{transition-delay:.20s}
+body.loaded .hero .mask:nth-child(3) > span{transition-delay:.30s}
+
+.hero-fade{opacity:0;transform:translateY(26px);transition:opacity .95s var(--ease),transform .95s var(--ease)}
+body.loaded .hero-fade{opacity:1;transform:none}
+body.loaded .hero-fade.f1{transition-delay:.75s}
+body.loaded .hero-fade.f2{transition-delay:.88s}
+body.loaded .hero-fade.f3{transition-delay:1.02s}
+body.loaded .hero-fade.f4{transition-delay:1.16s}
+
+/* ============================================================
+   MARQUEE
+   ============================================================ */
+.marquee{
+  border-top:1px solid var(--line);border-bottom:1px solid var(--line);
+  padding:22px 0;overflow:hidden;background:#07070a;position:relative;
+}
+.marquee::before,.marquee::after{
+  content:'';position:absolute;top:0;bottom:0;width:140px;z-index:2;pointer-events:none;
+}
+.marquee::before{left:0;background:linear-gradient(90deg,#07070a,transparent)}
+.marquee::after{right:0;background:linear-gradient(270deg,#07070a,transparent)}
+.marquee-track{display:flex;gap:56px;width:max-content;animation:marquee 34s linear infinite}
+.marquee:hover .marquee-track{animation-play-state:paused}
+.marquee-track span{
+  font-family:'Syne';font-weight:700;font-size:clamp(.9rem,1.6vw,1.15rem);
+  letter-spacing:.16em;text-transform:uppercase;color:#4a4a55;
+  display:flex;align-items:center;gap:56px;white-space:nowrap;
+}
+.marquee-track span::after{content:'';width:6px;height:6px;background:var(--red);border-radius:50%;flex-shrink:0}
+@keyframes marquee{to{transform:translateX(-50%)}}
+
+/* ============================================================
+   STATEMENT
+   ============================================================ */
+.statement{background:var(--bg);position:relative;overflow:hidden}
+.statement::after{
+  content:'';position:absolute;left:-10%;top:30%;width:60%;height:60%;
+  background:radial-gradient(circle,rgba(255,59,47,.07),transparent 65%);
+  pointer-events:none;
+}
+.statement-text{
+  font-size:clamp(2rem,5.6vw,4.6rem);
+  max-width:17ch;
+}
+.statement-text .line{display:block;overflow:hidden}
+.statement-text .line > span{display:block;transform:translateY(110%);transition:transform 1.1s var(--ease)}
+.statement-text.in .line > span{transform:translateY(0)}
+.statement-text .line:nth-child(2) > span{transition-delay:.1s}
+.statement-text .line:nth-child(3) > span{transition-delay:.2s}
+.statement-copy{
+  margin-top:38px;max-width:60ch;color:var(--muted);
+  font-size:clamp(.95rem,1.5vw,1.15rem);line-height:1.75;
+  border-left:1px solid var(--red);padding-left:26px;
+}
+
+/* ============================================================
+   SERVICES
+   ============================================================ */
+.services-grid{
+  display:grid;grid-template-columns:repeat(2,1fr);gap:22px;
+}
+@media (max-width:900px){.services-grid{grid-template-columns:1fr}}
+
+.svc-card{
+  position:relative;background:var(--surface);
+  border:1px solid var(--line);border-radius:3px;
+  padding:clamp(28px,3.4vw,52px);
+  overflow:hidden;
+  transform-style:preserve-3d;
+  transition:border-color .5s var(--ease),background .5s var(--ease);
+  will-change:transform;
+}
+.svc-card::before{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(500px circle at var(--mx,50%) var(--my,50%), rgba(255,59,47,.10), transparent 45%);
+  opacity:0;transition:opacity .5s var(--ease);pointer-events:none;
+}
+.svc-card:hover::before{opacity:1}
+.svc-card:hover{border-color:rgba(255,59,47,.35);background:#101015}
+
+.svc-num{
+  font-family:'Syne';font-weight:800;font-size:13px;letter-spacing:.2em;
+  color:var(--red);margin-bottom:26px;display:block;
+}
+.svc-title{
+  font-family:'Syne';font-weight:800;text-transform:uppercase;
+  font-size:clamp(1.6rem,3.4vw,2.7rem);letter-spacing:-.03em;line-height:1;
+}
+.svc-desc{margin-top:18px;color:var(--muted);max-width:38ch;font-size:.98rem}
+
+.svc-list{
+  margin-top:32px;display:flex;flex-wrap:wrap;gap:8px;
+}
+.svc-list li{
+  list-style:none;font-size:11.5px;letter-spacing:.06em;
+  padding:7px 13px;border:1px solid var(--line);border-radius:100px;
+  color:#a9a9b4;transition:border-color .35s,color .35s,background .35s;
+}
+.svc-card:hover .svc-list li{border-color:rgba(255,255,255,.14)}
+.svc-list li:hover{border-color:var(--red);color:#fff;background:var(--red-soft)}
+
+.svc-cta{
+  margin-top:38px;display:inline-flex;align-items:center;gap:10px;
+  font-size:12px;letter-spacing:.16em;text-transform:uppercase;font-weight:600;
+  color:var(--fg);
+}
+.svc-cta i{
+  display:block;width:22px;height:1px;background:var(--red);
+  transition:width .45s var(--ease);
+}
+.svc-cta:hover i{width:40px}
+
+/* ============================================================
+   WORK / PORTFOLIO
+   ============================================================ */
+.work{background:var(--bg-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+
+.filters{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:46px}
+.filter{
+  font-size:11.5px;letter-spacing:.12em;text-transform:uppercase;
+  padding:9px 17px;border:1px solid var(--line);border-radius:100px;color:var(--muted);
+  transition:all .4s var(--ease);
+}
+.filter:hover{color:#fff;border-color:var(--line-2)}
+.filter.active{background:var(--red);border-color:var(--red);color:#fff}
+
+.work-grid{
+  display:grid;
+  grid-template-columns:repeat(12,1fr);
+  gap:20px;
+}
+.card{
+  position:relative;
+  grid-column:span 4;
+  border-radius:3px;overflow:hidden;
+  background:var(--surface);
+  border:1px solid var(--line);
+  transition:transform .6s var(--ease),border-color .5s var(--ease),opacity .5s var(--ease),box-shadow .6s var(--ease);
+  transform-style:preserve-3d;
+  will-change:transform;
+}
+.card.wide{grid-column:span 8}
+.card.tall .thumb{aspect-ratio:9/16}
+.card .thumb{aspect-ratio:16/9;position:relative;overflow:hidden}
+.card:hover{border-color:rgba(255,59,47,.45);box-shadow:0 30px 70px -30px rgba(0,0,0,.9)}
+.card.hide{display:none}
+
+@media (max-width:1024px){
+  .card,.card.wide{grid-column:span 6}
+  .card.tall{grid-column:span 6}
+}
+@media (max-width:640px){
+  .card,.card.wide,.card.tall{grid-column:span 12}
+}
+
+.thumb{position:relative;overflow:hidden;background:#111}
+.thumb-art{
+  position:absolute;inset:0;
+  transition:transform 1.1s var(--ease),filter .6s var(--ease);
+  transform:scale(1.02);
+}
+.card:hover .thumb-art{transform:scale(1.09)}
+
+.grain::after{
+  content:'';position:absolute;inset:0;pointer-events:none;opacity:.2;mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.thumb-ghost{
+  position:absolute;right:18px;bottom:8px;
+  font-family:'Syne';font-weight:800;font-size:clamp(3rem,7vw,6rem);
+  line-height:1;color:rgba(255,255,255,.05);letter-spacing:-.05em;
+  transition:color .6s var(--ease),transform .6s var(--ease);
+}
+.card:hover .thumb-ghost{color:rgba(255,59,47,.16);transform:translateY(-6px)}
+
+.play{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) scale(.85);
+  width:64px;height:64px;border-radius:50%;
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.32);
+  -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;transition:opacity .5s var(--ease),transform .55s var(--ease),background .4s,border-color .4s;
+}
+.play::after{
+  content:'';border-left:12px solid #fff;border-top:8px solid transparent;border-bottom:8px solid transparent;
+  margin-left:4px;
+}
+.card:hover .play{opacity:1;transform:translate(-50%,-50%) scale(1);background:var(--red);border-color:var(--red);
+  box-shadow:0 0 0 12px rgba(255,59,47,.12)}
+
+.card-meta{padding:20px 22px 24px;display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
+.card-cat{
+  font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--red);margin-bottom:8px;display:block;
+}
+.card-title{font-family:'Syne';font-weight:700;font-size:1.02rem;letter-spacing:-.01em;line-height:1.3}
+.card-desc{font-size:.83rem;color:var(--muted);margin-top:6px;line-height:1.5;max-width:32ch}
+.card-arrow{
+  flex-shrink:0;width:34px;height:34px;border:1px solid var(--line);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;color:var(--muted);
+  transition:all .45s var(--ease);font-size:14px;
+}
+.card:hover .card-arrow{background:var(--red);border-color:var(--red);color:#fff;transform:rotate(45deg)}
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+.modal{
+  position:fixed;inset:0;z-index:1000;
+  background:rgba(3,3,4,.92);
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  display:flex;align-items:center;justify-content:center;
+  padding:clamp(16px,4vw,60px);
+  opacity:0;visibility:hidden;transition:opacity .5s var(--ease),visibility .5s;
+}
+.modal.open{opacity:1;visibility:visible}
+.modal-box{
+  width:min(1100px,100%);max-height:88vh;overflow-y:auto;
+  background:var(--surface);border:1px solid var(--line);border-radius:4px;
+  transform:translateY(34px) scale(.97);transition:transform .65s var(--ease);
+}
+.modal.open .modal-box{transform:none}
+.modal-media{position:relative;aspect-ratio:16/9;overflow:hidden;background:#0b0b0f}
+.modal-media.vertical{aspect-ratio:9/16;max-height:62vh;margin-inline:auto;width:auto}
+.modal-close{
+  position:absolute;top:16px;right:16px;z-index:5;
+  width:44px;height:44px;border-radius:50%;
+  background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.2);
+  -webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);
+  display:flex;align-items:center;justify-content:center;font-size:18px;
+  transition:all .4s var(--ease);
+}
+.modal-close:hover{background:var(--red);border-color:var(--red);transform:rotate(90deg)}
+.modal-info{padding:clamp(22px,3.4vw,42px)}
+.modal-info h3{font-family:'Syne';font-weight:800;text-transform:uppercase;font-size:clamp(1.4rem,3vw,2.2rem);letter-spacing:-.02em;margin-top:10px}
+.modal-info p{color:var(--muted);margin-top:16px;max-width:62ch}
+.modal-tags{display:flex;gap:8px;flex-wrap:wrap;margin-top:24px}
+.modal-tags span{font-size:11px;letter-spacing:.1em;text-transform:uppercase;padding:6px 13px;border:1px solid var(--line);border-radius:100px;color:#a9a9b4}
+
+/* ============================================================
+   PROCESS
+   ============================================================ */
+.process{position:relative}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-top:1px solid var(--line)}
+@media (max-width:900px){.steps{grid-template-columns:1fr 1fr}}
+@media (max-width:560px){.steps{grid-template-columns:1fr}}
+
+.step{
+  padding:44px 30px 50px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);
+  position:relative;overflow:hidden;transition:background .5s var(--ease);
+}
+.step:last-child{border-right:0}
+@media (max-width:900px){.step:nth-child(2n){border-right:0}}
+@media (max-width:560px){.step{border-right:0}}
+.step::before{
+  content:'';position:absolute;left:0;top:0;width:100%;height:2px;background:var(--red);
+  transform:scaleX(0);transform-origin:left;transition:transform .8s var(--ease);
+}
+.step:hover::before,.step.in::before{transform:scaleX(1)}
+.step:hover{background:#0b0b10}
+
+.step-num{
+  font-family:'Syne';font-weight:800;font-size:clamp(2.6rem,5vw,4.2rem);
+  letter-spacing:-.05em;line-height:1;color:transparent;
+  -webkit-text-stroke:1px rgba(255,255,255,.22);
+  transition:color .6s var(--ease),-webkit-text-stroke-color .6s var(--ease);
+}
+.step:hover .step-num{color:var(--red);-webkit-text-stroke-color:var(--red)}
+.step-title{
+  font-family:'Syne';font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+  font-size:1rem;margin-top:26px;
+}
+.step p{color:var(--muted);font-size:.9rem;margin-top:12px;line-height:1.65}
+
+/* ============================================================
+   ABOUT
+   ============================================================ */
+.about{background:var(--bg-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.about-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:clamp(40px,6vw,90px);align-items:center}
+@media (max-width:960px){.about-grid{grid-template-columns:1fr}}
+
+.about-copy p{color:var(--muted);margin-top:20px;max-width:56ch;line-height:1.8}
+.about-copy p strong{color:#dcdce4;font-weight:500}
+
+.stats{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line);margin-top:52px;border:1px solid var(--line)}
+.stat{background:var(--bg-2);padding:26px 22px}
+.stat b{
+  font-family:'Syne';font-weight:800;font-size:clamp(1.8rem,3.6vw,2.6rem);
+  letter-spacing:-.04em;display:block;line-height:1;
+}
+.stat b em{font-style:normal;color:var(--red)}
+.stat span{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted-2);margin-top:10px;display:block}
+
+/* 3D cube */
+.cube-stage{
+  display:flex;align-items:center;justify-content:center;
+  perspective:1100px;height:min(460px,60vw);
+}
+.cube{
+  position:relative;width:200px;height:200px;
+  transform-style:preserve-3d;
+  animation:cubeSpin 22s linear infinite;
+}
+@keyframes cubeSpin{
+  0%{transform:rotateX(-18deg) rotateY(0deg)}
+  100%{transform:rotateX(-18deg) rotateY(360deg)}
+}
+.cube-face{
+  position:absolute;inset:0;
+  border:1px solid rgba(255,59,47,.4);
+  background:linear-gradient(135deg,rgba(255,59,47,.09),rgba(255,255,255,.012));
+  -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Syne';font-weight:800;font-size:13px;letter-spacing:.22em;
+  text-transform:uppercase;color:#e9e9f0;text-align:center;padding:12px;
+}
+.cube-face:nth-child(1){transform:translateZ(100px)}
+.cube-face:nth-child(2){transform:rotateY(180deg) translateZ(100px)}
+.cube-face:nth-child(3){transform:rotateY(90deg) translateZ(100px)}
+.cube-face:nth-child(4){transform:rotateY(-90deg) translateZ(100px)}
+.cube-face:nth-child(5){transform:rotateX(90deg) translateZ(100px)}
+.cube-face:nth-child(6){transform:rotateX(-90deg) translateZ(100px)}
+.cube-face.red{background:linear-gradient(135deg,rgba(255,59,47,.5),rgba(255,59,47,.14));border-color:var(--red);color:#fff}
+
+/* ============================================================
+   PRICING
+   ============================================================ */
+.price-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+@media (max-width:980px){.price-grid{grid-template-columns:1fr}}
+
+.price{
+  position:relative;background:var(--surface);border:1px solid var(--line);
+  border-radius:3px;padding:clamp(26px,3vw,42px);
+  display:flex;flex-direction:column;
+  transition:transform .55s var(--ease),border-color .5s var(--ease),background .5s var(--ease);
+}
+.price:hover{transform:translateY(-6px);border-color:var(--line-2);background:#101015}
+.price.featured{border-color:rgba(255,59,47,.5);background:linear-gradient(180deg,rgba(255,59,47,.06),transparent 45%)}
+.price-badge{
+  position:absolute;top:-11px;left:clamp(26px,3vw,42px);
+  background:var(--red);color:#fff;font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;
+  padding:5px 12px;border-radius:2px;font-weight:600;
+}
+.price h4{font-family:'Syne';font-weight:700;text-transform:uppercase;font-size:1.15rem;letter-spacing:.04em}
+.price .amount{
+  font-family:'Syne';font-weight:800;font-size:clamp(2.2rem,4.4vw,3.2rem);
+  letter-spacing:-.045em;margin-top:22px;line-height:1;
+}
+.price .amount small{font-size:.35em;letter-spacing:0;color:var(--muted);font-weight:500;margin-left:8px}
+.price > p{color:var(--muted);font-size:.88rem;margin-top:14px;min-height:44px}
+.price ul{list-style:none;margin:30px 0 34px;display:flex;flex-direction:column;gap:13px;flex:1}
+.price li{display:flex;gap:12px;font-size:.88rem;color:#b9b9c4;align-items:flex-start}
+.price li::before{
+  content:'';flex-shrink:0;width:14px;height:14px;margin-top:4px;border-radius:50%;
+  background:var(--red-soft);border:1px solid rgba(255,59,47,.5);
+  background-image:linear-gradient(45deg,transparent 42%,var(--red) 42%,var(--red) 58%,transparent 58%);
+}
+.price .btn{width:100%}
+
+/* ============================================================
+   TESTIMONIALS
+   ============================================================ */
+.testi{background:var(--bg-2);border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+@media (max-width:980px){.testi-grid{grid-template-columns:1fr}}
+
+.quote{
+  background:var(--surface);border:1px solid var(--line);border-radius:3px;
+  padding:clamp(26px,3vw,38px);display:flex;flex-direction:column;gap:26px;
+  transition:transform .55s var(--ease),border-color .5s var(--ease);
+}
+.quote:hover{transform:translateY(-6px);border-color:rgba(255,59,47,.35)}
+.quote-mark{font-family:'Syne';font-weight:800;font-size:3rem;line-height:.6;color:var(--red)}
+.quote p{color:#cfcfd8;font-size:.98rem;line-height:1.75;flex:1}
+.quote-who{display:flex;align-items:center;gap:14px;border-top:1px solid var(--line);padding-top:22px}
+.avatar{
+  width:40px;height:40px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Syne';font-weight:700;font-size:14px;color:#fff;
+  background:linear-gradient(135deg,#2a2a33,#151519);border:1px solid var(--line-2);
+}
+.quote-who b{display:block;font-size:.88rem;font-weight:600}
+.quote-who span{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted-2)}
+
+/* ============================================================
+   CONTACT
+   ============================================================ */
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:clamp(40px,6vw,90px)}
+@media (max-width:960px){.contact-grid{grid-template-columns:1fr}}
+
+.contact-title{font-size:clamp(2.2rem,6vw,5rem)}
+.contact-info{margin-top:46px;display:flex;flex-direction:column;gap:22px}
+.info-row{display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--line);padding-top:20px}
+.info-row span{font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--muted-2)}
+.info-row a,.info-row p{font-size:1rem;color:#dcdce4;transition:color .35s}
+.info-row a:hover{color:var(--red)}
+
+form{display:flex;flex-direction:column;gap:20px}
+.field{position:relative;display:flex;flex-direction:column;gap:9px}
+.field label{font-size:10.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--muted-2)}
+.field input,.field select,.field textarea{
+  width:100%;background:transparent;border:0;border-bottom:1px solid var(--line-2);
+  padding:12px 0;color:var(--fg);font-family:inherit;font-size:.95rem;
+  outline:none;transition:border-color .4s var(--ease),background .4s;
+  border-radius:0;-webkit-appearance:none;appearance:none;
+}
+.field textarea{resize:vertical;min-height:110px;border:1px solid var(--line-2);padding:14px;border-radius:2px}
+.field select{background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);
+  background-position:calc(100% - 14px) 20px, calc(100% - 9px) 20px;
+  background-size:5px 5px,5px 5px;background-repeat:no-repeat;}
+.field select option{background:#0e0e12;color:#fff}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--red)}
+.field input::placeholder,.field textarea::placeholder{color:#4b4b55}
+
+.form-msg{
+  font-size:.85rem;color:var(--red);letter-spacing:.06em;
+  opacity:0;transform:translateY(-6px);transition:all .5s var(--ease);
+}
+.form-msg.show{opacity:1;transform:none}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+footer{border-top:1px solid var(--line);padding:clamp(60px,8vw,110px) 0 40px;background:#040405}
+.foot-top{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:44px}
+@media (max-width:900px){.foot-top{grid-template-columns:1fr 1fr}}
+@media (max-width:560px){.foot-top{grid-template-columns:1fr}}
+
+.foot-brand p{color:var(--muted);font-size:.9rem;margin-top:20px;max-width:34ch}
+.foot-col h5{font-size:10.5px;letter-spacing:.24em;text-transform:uppercase;color:var(--muted-2);margin-bottom:20px;font-weight:600}
+.foot-col a{display:block;font-size:.9rem;color:#b6b6c0;padding:6px 0;transition:color .3s,transform .4s var(--ease)}
+.foot-col a:hover{color:var(--red);transform:translateX(5px)}
+
+.foot-bottom{
+  margin-top:70px;padding-top:28px;border-top:1px solid var(--line);
+  display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;
+  font-size:11.5px;color:var(--muted-2);letter-spacing:.08em;
+}
+.foot-bottom .red{color:var(--red)}
+
+/* Big ghost word */
+.foot-word{
+  font-family:'Syne';font-weight:800;text-transform:uppercase;
+  font-size:clamp(3.6rem,16vw,15rem);line-height:.82;letter-spacing:-.05em;
+  color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.07);
+  margin-top:60px;text-align:center;user-select:none;
+}
+
+/* ============================================================
+   MISC
+   ============================================================ */
+.to-top{
+  position:fixed;right:26px;bottom:26px;z-index:700;
+  width:46px;height:46px;border-radius:50%;
+  background:var(--red);color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;visibility:hidden;transform:translateY(14px);
+  transition:all .5s var(--ease);
+  box-shadow:0 12px 34px -12px rgba(255,59,47,.85);
+}
+.to-top.show{opacity:1;visibility:visible;transform:none}
+.to-top:hover{transform:translateY(-4px)}
+
+@media (prefers-reduced-motion:reduce){
+  *{animation-duration:.01ms !important;transition-duration:.01ms !important}
+  html{scroll-behavior:auto}
+}
+</style>
+</head>
+<body>
+
+<!-- ================= PRELOADER ================= -->
+<div id="preloader">
+  <div class="pre-logo">R<i></i></div>
+  <div class="pre-bar"><i></i></div>
+</div>
+
+<!-- ================= CURSOR ================= -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-dot" id="cursorDot"></div>
+
+<!-- ================= NAV ================= -->
+<header class="nav" id="nav">
+  <div class="nav-inner">
+    <a href="#home" class="logo">
+      <span class="logo-mark">R<i></i></span>
+      <span class="logo-text">REKUT<em>STUDIO</em></span>
+    </a>
+
+    <nav class="nav-links">
+      <a href="#home">Home</a>
+      <a href="#about">About</a>
+      <a href="#services">Services</a>
+      <a href="#work">Sample Videos</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#testimonials">Testimonials</a>
+      <a href="#contact">Contact</a>
+    </nav>
+
+    <div class="nav-actions">
+      <a href="#contact" class="login-link">Client Login</a>
+      <a href="#contact" class="btn btn-red btn-sm"><span>Start a Project</span></a>
+      <button class="burger" id="burger" aria-label="Menu"><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<!-- ================= MOBILE MENU ================= -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#home" class="m-link"><small>01</small>Home</a>
+  <a href="#about" class="m-link"><small>02</small>About</a>
+  <a href="#services" class="m-link"><small>03</small>Services</a>
+  <a href="#work" class="m-link"><small>04</small>Sample Videos</a>
+  <a href="#pricing" class="m-link"><small>05</small>Pricing</a>
+  <a href="#testimonials" class="m-link"><small>06</small>Testimonials</a>
+  <a href="#contact" class="m-link"><small>07</small>Contact</a>
+  <div class="mobile-foot">
+    <span>Client Login</span>
+    <span>hello@rekutstudio.com</span>
+  </div>
+</div>
+
+<!-- ================= HERO ================= -->
+<section class="hero" id="home">
+  <canvas id="hero-canvas"></canvas>
+  <div class="hero-grid"></div>
+  <div class="hero-slash"></div>
+  <div class="hero-vignette"></div>
+
+  <div class="container hero-inner" id="heroInner">
+    <span class="eyebrow hero-fade f1">Video Editing &amp; Web Development Studio</span>
+
+    <h1 class="hero-title display">
+      <span class="mask"><span>We Cut</span></span>
+      <span class="mask"><span>What <em class="strike" style="font-style:normal">Doesn't</em></span></span>
+      <span class="mask"><span class="accent">Matter.</span></span>
+    </h1>
+
+    <p class="hero-sub hero-fade f2">Video editing and digital experiences built to hold attention.</p>
+    <p class="hero-desc hero-fade f3">
+      REKUT Studio helps creators, brands, and businesses turn raw footage and ideas
+      into content people actually engage with.
+    </p>
+
+    <div class="hero-cta hero-fade f4">
+      <a href="#contact" class="btn btn-red"><span>Start a Project →</span></a>
+      <a href="#work" class="btn btn-outline"><span>View Our Work</span></a>
+    </div>
+  </div>
+
+  <div class="hero-scroll"><span>Scroll</span><i></i></div>
+</section>
+
+<!-- ================= MARQUEE ================= -->
+<div class="marquee">
+  <div class="marquee-track">
+    <span>Reels</span><span>YouTube</span><span>Shorts</span><span>Podcast Clips</span>
+    <span>UGC Ads</span><span>Brand Films</span><span>Real Estate</span><span>Web Development</span>
+    <span>Reels</span><span>YouTube</span><span>Shorts</span><span>Podcast Clips</span>
+    <span>UGC Ads</span><span>Brand Films</span><span>Real Estate</span><span>Web Development</span>
+  </div>
+</div>
+
+<!-- ================= STATEMENT ================= -->
+<section class="section statement">
+  <div class="container">
+    <h2 class="display statement-text reveal-words" id="statementText">
+      <span class="line"><span>Every Cut Should</span></span>
+      <span class="line"><span>Have A</span></span>
+      <span class="line"><span class="accent">Purpose.</span></span>
+    </h2>
+    <p class="statement-copy reveal d2">
+      We remove what doesn't matter and keep what does — creating content designed to hold
+      attention from the first second to the last.
+    </p>
+  </div>
+</section>
+
+<!-- ================= SERVICES ================= -->
+<section class="section" id="services">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">What We Do</span>
+      <h2 class="display section-title">From The Timeline<br>To The Browser.</h2>
+    </div>
+
+    <div class="services-grid">
+      <!-- VIDEO -->
+      <article class="svc-card tilt reveal d1">
+        <span class="svc-num">01 / VIDEO EDITING</span>
+        <h3 class="svc-title">Video<br>Editing</h3>
+        <p class="svc-desc">We turn raw footage into content people actually want to watch.</p>
+
+        <ul class="svc-list">
+          <li>Short-form</li><li>Long-form YouTube</li><li>Reels</li><li>Shorts</li>
+          <li>Podcast Clips</li><li>Talking-head</li><li>Real Estate</li><li>Property Tours</li>
+          <li>UGC Ads</li><li>Product Videos</li><li>Wedding &amp; Events</li>
+          <li>Food &amp; Restaurant</li><li>Fitness &amp; Travel</li><li>Brand Films</li>
+        </ul>
+
+        <a href="#work" class="svc-cta">Explore Video Editing <i></i></a>
+      </article>
+
+      <!-- WEB -->
+      <article class="svc-card tilt reveal d2">
+        <span class="svc-num">02 / WEB DEVELOPMENT</span>
+        <h3 class="svc-title">Web<br>Development</h3>
+        <p class="svc-desc">We turn ideas into fast, modern digital experiences.</p>
+
+        <ul class="svc-list">
+          <li>Business Websites</li><li>Landing Pages</li><li>E-commerce</li>
+          <li>Portfolio Sites</li><li>Custom Experiences</li><li>Responsive Build</li>
+          <li>Conversion-focused Pages</li>
+        </ul>
+
+        <a href="#contact" class="svc-cta">Explore Web Development <i></i></a>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ================= WORK ================= -->
+<section class="section work" id="work">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">Selected Work</span>
+      <h2 class="display section-title">The Work Speaks.</h2>
+      <p class="section-sub">A curated look at the edits, ads, films and builds we've shipped.</p>
+    </div>
+
+    <div class="filters reveal d1" id="filters">
+      <button class="filter active" data-filter="all">All</button>
+      <button class="filter" data-filter="reels">Reels</button>
+      <button class="filter" data-filter="youtube">YouTube</button>
+      <button class="filter" data-filter="podcasts">Podcasts</button>
+      <button class="filter" data-filter="realestate">Real Estate</button>
+      <button class="filter" data-filter="ads">Ads</button>
+      <button class="filter" data-filter="brands">Brands</button>
+      <button class="filter" data-filter="events">Events</button>
+      <button class="filter" data-filter="food">Food</button>
+      <button class="filter" data-filter="fitness">Fitness</button>
+      <button class="filter" data-filter="travel">Travel</button>
+    </div>
+
+    <div class="work-grid" id="workGrid"></div>
+  </div>
+</section>
+
+<!-- ================= PROCESS ================= -->
+<section class="section process">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">How We Work</span>
+      <h2 class="display section-title">From Raw<br>To Remarkable.</h2>
+    </div>
+
+    <div class="steps">
+      <div class="step reveal d1">
+        <div class="step-num">01</div>
+        <h4 class="step-title">Send</h4>
+        <p>Send your footage, idea, references or requirements. We take it from there.</p>
+      </div>
+      <div class="step reveal d2">
+        <div class="step-num">02</div>
+        <h4 class="step-title">Craft</h4>
+        <p>We edit, refine, design and build with your goals, platform and audience in mind.</p>
+      </div>
+      <div class="step reveal d3">
+        <div class="step-num">03</div>
+        <h4 class="step-title">Review</h4>
+        <p>You review the work and share feedback. We iterate until it's right.</p>
+      </div>
+      <div class="step reveal d4">
+        <div class="step-num">04</div>
+        <h4 class="step-title">Deliver</h4>
+        <p>You receive polished, platform-ready content or your finished digital experience.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ABOUT ================= -->
+<section class="section about" id="about">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">About The Studio</span>
+      <h2 class="display section-title">We Make Every<br>Second Count.</h2>
+    </div>
+
+    <div class="about-grid">
+      <div class="about-copy reveal d1">
+        <p>
+          <strong>REKUT Studio</strong> is a video editing and web development agency that helps creators,
+          brands and businesses turn raw footage and ideas into content and digital experiences
+          people actually engage with.
+        </p>
+        <p>
+          Founded by an editor with over two years of experience working with creators and brands,
+          REKUT Studio is built on one idea: <strong>every cut should have a purpose.</strong>
+        </p>
+        <p>
+          We remove what doesn't matter and keep what does — creating tight, engaging videos designed
+          to hold attention from the first second to the last. Alongside editing, we build fast,
+          modern websites for businesses and creators who need a strong online presence.
+        </p>
+
+        <div class="stats">
+          <div class="stat"><b data-count="2" data-suffix="+">0</b><span>Years Experience</span></div>
+          <div class="stat"><b data-count="250" data-suffix="+">0</b><span>Projects Delivered</span></div>
+          <div class="stat"><b data-count="40" data-suffix="+">0</b><span>Happy Clients</span></div>
+          <div class="stat"><b data-count="48" data-suffix="H">0</b><span>Avg. Turnaround</span></div>
+        </div>
+      </div>
+
+      <div class="reveal d2">
+        <div class="cube-stage">
+          <div class="cube">
+            <div class="cube-face">Precision</div>
+            <div class="cube-face red">Purpose</div>
+            <div class="cube-face">Motion</div>
+            <div class="cube-face red">Editing</div>
+            <div class="cube-face">Story</div>
+            <div class="cube-face red">Rekut</div>
+          </div>
+        </div>
+        <h3 class="display" style="font-size:clamp(1.5rem,3.4vw,2.4rem);text-align:center;margin-top:10px">
+          Cut The Noise.<br><span class="accent">Keep The Story.</span>
+        </h3>
+        <p style="color:var(--muted);text-align:center;margin-top:18px;max-width:46ch;margin-inline:auto;font-size:.92rem">
+          The red slash in our logo represents precision, movement and editing — cutting away
+          everything unnecessary so only the story remains.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PRICING ================= -->
+<section class="section" id="pricing">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">Pricing</span>
+      <h2 class="display section-title">Simple, Honest<br>Packages.</h2>
+      <p class="section-sub">Every project is different. These are starting points — we tailor each one to your platform, audience and goals.</p>
+    </div>
+
+    <div class="price-grid">
+      <div class="price reveal d1">
+        <h4>Starter</h4>
+        <div class="amount">$149<small>/ project</small></div>
+        <p>For creators who need consistent, clean short-form content.</p>
+        <ul>
+          <li>Up to 4 short-form edits</li>
+          <li>Basic colour &amp; sound polish</li>
+          <li>Captions &amp; hooks</li>
+          <li>1 revision round</li>
+          <li>48–72h turnaround</li>
+        </ul>
+        <a href="#contact" class="btn btn-outline"><span>Get Started</span></a>
+      </div>
+
+      <div class="price featured reveal d2">
+        <span class="price-badge">Most Popular</span>
+        <h4>Creator</h4>
+        <div class="amount">$399<small>/ month</small></div>
+        <p>For creators and brands posting consistently across platforms.</p>
+        <ul>
+          <li>Up to 12 short-form edits</li>
+          <li>2 long-form YouTube edits</li>
+          <li>Advanced motion &amp; sound design</li>
+          <li>Thumbnail support</li>
+          <li>Unlimited revisions</li>
+          <li>Priority 24–48h turnaround</li>
+        </ul>
+        <a href="#contact" class="btn btn-red"><span>Start a Project</span></a>
+      </div>
+
+      <div class="price reveal d3">
+        <h4>Brand</h4>
+        <div class="amount">Custom</div>
+        <p>For businesses needing video plus a full digital presence.</p>
+        <ul>
+          <li>Full video content system</li>
+          <li>Ad creatives &amp; UGC</li>
+          <li>Business website or landing page</li>
+          <li>E-commerce &amp; custom builds</li>
+          <li>Dedicated communication</li>
+          <li>Ongoing monthly retainer</li>
+        </ul>
+        <a href="#contact" class="btn btn-outline"><span>Let's Talk</span></a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= TESTIMONIALS ================= -->
+<section class="section testi" id="testimonials">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">Testimonials</span>
+      <h2 class="display section-title">Trusted By<br>Creators &amp; Brands.</h2>
+    </div>
+
+    <div class="testi-grid">
+      <div class="quote reveal d1">
+        <div class="quote-mark">"</div>
+        <p>REKUT turned 4 hours of raw podcast footage into 20 clips that actually performed. The pacing is unreal — nothing feels wasted.</p>
+        <div class="quote-who">
+          <div class="avatar">A</div>
+          <div><b>Aarav M.</b><span>Podcast Host</span></div>
+        </div>
+      </div>
+
+      <div class="quote reveal d2">
+        <div class="quote-mark">"</div>
+        <p>Our property tours finally look premium. Listings get more views and enquiries since we started working with the studio.</p>
+        <div class="quote-who">
+          <div class="avatar">S</div>
+          <div><b>Sneha R.</b><span>Real Estate Agency</span></div>
+        </div>
+      </div>
+
+      <div class="quote reveal d3">
+        <div class="quote-mark">"</div>
+        <p>They built our site and handle all our ad creatives. Fast communication, quick turnarounds, zero drama. Rare combo.</p>
+        <div class="quote-who">
+          <div class="avatar">K</div>
+          <div><b>Kabir T.</b><span>D2C Brand Founder</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CONTACT ================= -->
+<section class="section" id="contact">
+  <div class="container">
+    <div class="contact-grid">
+      <div class="reveal">
+        <span class="eyebrow">Contact</span>
+        <h2 class="display contact-title" style="margin-top:22px">
+          You Bring The Footage.<br><span class="accent">We Make It Matter.</span>
+        </h2>
+        <p style="color:var(--muted);margin-top:24px;max-width:44ch">
+          Bring the footage or the idea — we'll turn it into content and digital experiences
+          worth remembering.
+        </p>
+
+        <div class="contact-info">
+          <div class="info-row"><span>Email</span><a href="mailto:hello@rekutstudio.com">hello@rekutstudio.com</a></div>
+          <div class="info-row"><span>Response Time</span><p>Usually within a few hours</p></div>
+          <div class="info-row"><span>Availability</span><p>Taking on new projects</p></div>
+        </div>
+      </div>
+
+      <div class="reveal d2">
+        <form id="projectForm">
+          <div class="field">
+            <label for="name">Your Name</label>
+            <input type="text" id="name" placeholder="John Doe" required>
+          </div>
+          <div class="field">
+            <label for="email">Email</label>
+            <input type="email" id="email" placeholder="you@company.com" required>
+          </div>
+          <div class="field">
+            <label for="type">What Do You Need?</label>
+            <select id="type">
+              <option>Video Editing — Short-form</option>
+              <option>Video Editing — Long-form / YouTube</option>
+              <option>Video Editing — Ads / UGC</option>
+              <option>Web Development</option>
+              <option>Both Video &amp; Web</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="msg">Project Details</label>
+            <textarea id="msg" placeholder="Tell us about your project, platform and goals..."></textarea>
+          </div>
+          <button type="submit" class="btn btn-red" style="align-self:flex-start"><span>Send Project Brief →</span></button>
+          <div class="form-msg" id="formMsg">✓ Brief received. We'll get back to you shortly.</div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FOOTER ================= -->
+<footer>
+  <div class="container">
+    <div class="foot-top">
+      <div class="foot-brand">
+        <a href="#home" class="logo">
+          <span class="logo-mark">R<i></i></span>
+          <span class="logo-text">REKUT<em>STUDIO</em></span>
+        </a>
+        <p>Video editing and web development studio. Every cut should have a purpose.</p>
+      </div>
+
+      <div class="foot-col">
+        <h5>Navigate</h5>
+        <a href="#home">Home</a>
+        <a href="#about">About</a>
+        <a href="#services">Services</a>
+        <a href="#work">Sample Videos</a>
+      </div>
+
+      <div class="foot-col">
+        <h5>Services</h5>
+        <a href="#services">Video Editing</a>
+        <a href="#services">Web Development</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#contact">Start a Project</a>
+      </div>
+
+      <div class="foot-col">
+        <h5>Connect</h5>
+        <a href="#contact">Instagram</a>
+        <a href="#contact">YouTube</a>
+        <a href="#contact">LinkedIn</a>
+        <a href="#contact">Client Login</a>
+      </div>
+    </div>
+
+    <div class="foot-word">REKUT</div>
+
+    <div class="foot-bottom">
+      <span>© <span id="year"></span> REKUT Studio. All rights reserved.</span>
+      <span>Cut the noise. <span class="red">Keep the story.</span></span>
+    </div>
+  </div>
+</footer>
+
+<button class="to-top" id="toTop" aria-label="Back to top">↑</button>
+
+<!-- ================= MODAL ================= -->
+<div class="modal" id="modal">
+  <div class="modal-box">
+    <div class="modal-media" id="modalMedia">
+      <button class="modal-close" id="modalClose">✕</button>
+      <div class="thumb-art grain" id="modalArt" style="position:absolute;inset:0"></div>
+      <div class="play" style="opacity:1;transform:translate(-50%,-50%) scale(1);width:84px;height:84px"></div>
+    </div>
+    <div class="modal-info">
+      <span class="card-cat" id="modalCat">Category</span>
+      <h3 id="modalTitle">Title</h3>
+      <p id="modalDesc">Description</p>
+      <div class="modal-tags" id="modalTags"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= THREE.JS ================= -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<script>
+/* ============================================================
+   0. PRELOADER
+   ============================================================ */
+window.addEventListener('load', () => {
+  setTimeout(() => document.body.classList.add('loaded'), 1350);
+});
+/* Fallback if load never fires */
+setTimeout(() => document.body.classList.add('loaded'), 3500);
+
+
+/* ============================================================
+   1. YEAR
+   ============================================================ */
+document.getElementById('year').textContent = new Date().getFullYear();
+
+
+/* ============================================================
+   2. CUSTOM CURSOR
+   ============================================================ */
+(function cursor(){
+  if (window.matchMedia('(pointer:coarse)').matches) return;
+  const c = document.getElementById('cursor');
+  const d = document.getElementById('cursorDot');
+  let mx = innerWidth/2, my = innerHeight/2;
+  let cx = mx, cy = my, dx = mx, dy = my;
+
+  window.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+
+  (function loop(){
+    cx += (mx - cx) * 0.14;
+    cy += (my - cy) * 0.14;
+    dx += (mx - dx) * 0.42;
+    dy += (my - dy) * 0.42;
+    c.style.transform = `translate(${cx}px, ${cy}px)`;
+    d.style.transform = `translate(${dx}px, ${dy}px)`;
+    requestAnimationFrame(loop);
+  })();
+
+  const hoverables = 'a, button, .card, .svc-card, .filter, input, textarea, select, .quote';
+  document.addEventListener('mouseover', e => {
+    if (e.target.closest(hoverables)) c.classList.add('grow');
+  });
+  document.addEventListener('mouseout', e => {
+    if (e.target.closest(hoverables)) c.classList.remove('grow');
+  });
+})();
+
+
+/* ============================================================
+   3. NAV
+   ============================================================ */
+const nav = document.getElementById('nav');
+const toTop = document.getElementById('toTop');
+
+window.addEventListener('scroll', () => {
+  const y = window.scrollY;
+  nav.classList.toggle('scrolled', y > 40);
+  toTop.classList.toggle('show', y > 700);
+}, { passive:true });
+
+toTop.addEventListener('click', () => window.scrollTo({ top:0, behavior:'smooth' }));
+
+/* Mobile menu */
+const burger = document.getElementById('burger');
+const mobileMenu = document.getElementById('mobileMenu');
+
+burger.addEventListener('click', () => {
+  const open = mobileMenu.classList.toggle('open');
+  burger.classList.toggle('open', open);
+  document.body.classList.toggle('locked', open);
+  const links = mobileMenu.querySelectorAll('.m-link');
+  links.forEach((l, i) => {
+    l.style.transitionDelay = open ? (0.12 + i * 0.055) + 's' : '0s';
+  });
+});
+
+mobileMenu.querySelectorAll('a').forEach(a => {
+  a.addEventListener('click', () => {
+    mobileMenu.classList.remove('open');
+    burger.classList.remove('open');
+    document.body.classList.remove('locked');
+  });
+});
+
+
+/* ============================================================
+   4. SCROLL REVEALS
+   ============================================================ */
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(en => {
+    if (en.isIntersecting) {
+      en.target.classList.add('in');
+      io.unobserve(en.target);
+    }
+  });
+}, { threshold: 0.15, rootMargin: '0px 0px -60px 0px' });
+
+document.querySelectorAll('.reveal, .step').forEach(el => io.observe(el));
+
+/* Statement line reveal */
+const st = document.getElementById('statementText');
+const stIO = new IntersectionObserver((e) => {
+  if (e[0].isIntersecting) { st.classList.add('in'); stIO.disconnect(); }
+}, { threshold: 0.35 });
+stIO.observe(st);
+
+
+/* ============================================================
+   5. COUNTERS
+   ============================================================ */
+const counters = document.querySelectorAll('[data-count]');
+const cIO = new IntersectionObserver((entries) => {
+  entries.forEach(en => {
+    if (!en.isIntersecting) return;
+    const el = en.target;
+    const target = parseFloat(el.dataset.count);
+    const suffix = el.dataset.suffix || '';
+    const dur = 1600;
+    const start = performance.now();
+
+    function tick(now){
+      const p = Math.min((now - start) / dur, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      const val = Math.floor(eased * target);
+      el.innerHTML = val + '<em>' + suffix + '</em>';
+      if (p < 1) requestAnimationFrame(tick);
+      else el.innerHTML = target + '<em>' + suffix + '</em>';
+    }
+    requestAnimationFrame(tick);
+    cIO.unobserve(el);
+  });
+}, { threshold: 0.5 });
+counters.forEach(c => cIO.observe(c));
+
+
+/* ============================================================
+   6. WORK GRID + FILTERS + MODAL
+   ============================================================ */
+const projects = [
+  { title:'Skyline Penthouse Tour', cat:'realestate', label:'Real Estate', ratio:'tall',
+    desc:'A cinematic property walkthrough cut for vertical platforms — paced to keep viewers past the first three seconds.',
+    tags:['9:16','Colour Grade','Sound Design'], c1:'#1b2a3a', c2:'#070b10' },
+
+  { title:'Founder Podcast — Clip Pack', cat:'podcasts', label:'Podcasts', ratio:'wide',
+    desc:'Twelve high-retention clips pulled from a 90-minute conversation, each with its own hook.',
+    tags:['16:9','Captions','Hook Writing'], c1:'#2a1b1b', c2:'#0d0707' },
+
+  { title:'Athleisure Brand Ad', cat:'ads', label:'Ads', ratio:'',
+    desc:'A punchy UGC-style ad creative built for paid social testing.',
+    tags:['Paid Social','UGC','Motion'], c1:'#1c1f2b', c2:'#08090e' },
+
+  { title:'Night Market Food Reel', cat:'food', label:'Food', ratio:'tall',
+    desc:'Fast, appetite-driven cuts with rhythmic sound design and warm grading.',
+    tags:['9:16','Rhythm Cut','Grade'], c1:'#2b1d12', c2:'#0e0a06' },
+
+  { title:'Creator Channel — Long Form', cat:'youtube', label:'YouTube', ratio:'wide',
+    desc:'A full YouTube edit with retention-focused pacing, b-roll layering and graphics.',
+    tags:['16:9','Retention Edit','Graphics'], c1:'#161f2c', c2:'#070a0e' },
+
+  { title:'Sunrise Trail Film', cat:'travel', label:'Travel', ratio:'',
+    desc:'A slow, atmospheric travel piece balancing motion and stillness.',
+    tags:['Cinematic','Grade','Sound'], c1:'#1a2620', c2:'#070b09' },
+
+  { title:'Strength Series', cat:'fitness', label:'Fitness', ratio:'tall',
+    desc:'High-energy fitness reels cut to the beat with bold on-screen type.',
+    tags:['9:16','Beat Cut','Type'], c1:'#241a2b', c2:'#0b070e' },
+
+  { title:'Wedding Highlight Film', cat:'events', label:'Events', ratio:'wide',
+    desc:'An emotional highlight edit built from hours of ceremony and reception footage.',
+    tags:['Highlight','Grade','Music'], c1:'#2b2320', c2:'#0d0a09' },
+
+  { title:'Studio Brand Film', cat:'brands', label:'Brands', ratio:'',
+    desc:'A brand film that positions the client as a category leader.',
+    tags:['Brand Film','Motion','Grade'], c1:'#1e1e26', c2:'#08080c' },
+
+  { title:'Product Drop Reel', cat:'reels', label:'Reels', ratio:'tall',
+    desc:'A snappy product launch reel designed for maximum scroll-stopping power.',
+    tags:['9:16','Product','Motion'], c1:'#26161a', c2:'#0c0708' },
+
+  { title:'Agency Website Build', cat:'brands', label:'Web', ratio:'wide',
+    desc:'A fast, responsive business website with a conversion-focused landing page.',
+    tags:['Web Dev','Responsive','SEO'], c1:'#151a24', c2:'#07090d' },
+
+  { title:'Realtor Short-Form Pack', cat:'realestate', label:'Real Estate', ratio:'',
+    desc:'A monthly batch of listing reels that consistently outperform static posts.',
+    tags:['Batch','9:16','Captions'], c1:'#1d2430', c2:'#080a0e' }
+];
+
+const grid = document.getElementById('workGrid');
+
+function makeCard(p, i){
+  const el = document.createElement('article');
+  el.className = 'card tilt ' + (p.ratio || '');
+  el.dataset.cat = p.cat;
+  el.dataset.index = i;
+  el.innerHTML = `
+    <div class="thumb grain">
+      <div class="thumb-art" style="background:
+        radial-gradient(120% 100% at 25% 15%, ${p.c1}, ${p.c2} 70%),
+        linear-gradient(135deg, ${p.c1}, ${p.c2});"></div>
+      <div class="thumb-ghost">${String(i+1).padStart(2,'0')}</div>
+      <div class="play"></div>
+    </div>
+    <div class="card-meta">
+      <div>
+        <span class="card-cat">${p.label}</span>
+        <h3 class="card-title">${p.title}</h3>
+        <p class="card-desc">${p.desc.slice(0,72)}…</p>
+      </div>
+      <div class="card-arrow">↗</div>
+    </div>`;
+  el.addEventListener('click', () => openModal(i));
+  return el;
+}
+
+projects.forEach((p, i) => grid.appendChild(makeCard(p, i)));
+
+/* Filters */
+document.getElementById('filters').addEventListener('click', e => {
+  const btn = e.target.closest('.filter');
+  if (!btn) return;
+  document.querySelectorAll('.filter').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  const f = btn.dataset.filter;
+  document.querySelectorAll('.card').forEach(card => {
+    const show = f === 'all' || card.dataset.cat === f;
+    card.classList.toggle('hide', !show);
+    if (show) {
+      card.style.animation = 'none';
+      void card.offsetWidth;
+      card.style.animation = 'cardIn .6s cubic-bezier(.22,1,.36,1) both';
+    }
+  });
+});
+
+/* Inject keyframe */
+const styleTag = document.createElement('style');
+styleTag.textContent = `@keyframes cardIn{from{opacity:0;transform:translateY(24px) scale(.98)}to{opacity:1;transform:none}}`;
+document.head.appendChild(styleTag);
+
+/* Modal */
+const modal = document.getElementById('modal');
+const modalArt = document.getElementById('modalArt');
+const modalCat = document.getElementById('modalCat');
+const modalTitle = document.getElementById('modalTitle');
+const modalDesc = document.getElementById('modalDesc');
+const modalTags = document.getElementById('modalTags');
+const modalMedia = document.getElementById('modalMedia');
+
+function openModal(i){
+  const p = projects[i];
+  modalArt.style.background = `radial-gradient(120% 100% at 25% 15%, ${p.c1}, ${p.c2} 70%), linear-gradient(135deg, ${p.c1}, ${p.c2})`;
+  modalCat.textContent = p.label;
+  modalTitle.textContent = p.title;
+  modalDesc.textContent = p.desc;
+  modalTags.innerHTML = p.tags.map(t => `<span>${t}</span>`).join('');
+  modalMedia.classList.toggle('vertical', p.ratio === 'tall');
+  modal.classList.add('open');
+  document.body.classList.add('locked');
+}
+
+function closeModal(){
+  modal.classList.remove('open');
+  document.body.classList.remove('locked');
+}
+
+document.getElementById('modalClose').addEventListener('click', closeModal);
+modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+
+/* ============================================================
+   7. 3D TILT CARDS
+   ============================================================ */
+function bindTilt(el){
+  let raf = null;
+  el.addEventListener('mousemove', e => {
+    const r = el.getBoundingClientRect();
+    const px = (e.clientX - r.left) / r.width;
+    const py = (e.clientY - r.top) / r.height;
+    const rx = (0.5 - py) * 6;
+    const ry = (px - 0.5) * 6;
+
+    el.style.setProperty('--mx', (px * 100) + '%');
+    el.style.setProperty('--my', (py * 100) + '%');
+
+    if (raf) cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(() => {
+      el.style.transform = `perspective(1000px) rotateX(${rx}deg) rotateY(${ry}deg) translateY(-4px)`;
+    });
+  });
+
+  el.addEventListener('mouseleave', () => {
+    if (raf) cancelAnimationFrame(raf);
+    el.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) translateY(0)';
+  });
+}
+document.querySelectorAll('.tilt').forEach(bindTilt);
+
+
+/* ============================================================
+   8. HERO MOUSE PARALLAX
+   ============================================================ */
+(function heroParallax(){
+  const inner = document.getElementById('heroInner');
+  const slash = document.querySelector('.hero-slash');
+  const hero = document.querySelector('.hero');
+  let tx = 0, ty = 0, cx = 0, cy = 0;
+
+  if (!window.matchMedia('(pointer:fine)').matches) return;
+
+  hero.addEventListener('mousemove', e => {
+    const r = hero.getBoundingClientRect();
+    tx = ((e.clientX - r.left) / r.width - 0.5);
+    ty = ((e.clientY - r.top) / r.height - 0.5);
+  });
+
+  hero.addEventListener('mouseleave', () => { tx = 0; ty = 0; });
+
+  (function loop(){
+    cx += (tx - cx) * 0.06;
+    cy += (ty - cy) * 0.06;
+    if (inner) inner.style.transform = `translate3d(${cx * 14}px, ${cy * 10}px, 0)`;
+    if (slash) slash.style.marginLeft = (cx * 26) + 'px';
+    requestAnimationFrame(loop);
+  })();
+})();
+
+
+/* ============================================================
+   9. THREE.JS CINEMATIC PARTICLE FIELD
+   ============================================================ */
+(function threeHero(){
+  if (!window.THREE) return;
+  const canvas = document.getElementById('hero-canvas');
+  if (!canvas) return;
+
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(58, innerWidth / innerHeight, 1, 3000);
+  camera.position.z = 520;
+
+  const renderer = new THREE.WebGLRenderer({ canvas, alpha:true, antialias:true });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.setSize(innerWidth, innerHeight);
+
+  /* ---- Particles ---- */
+  const COUNT = 900;
+  const geo = new THREE.BufferGeometry();
+  const pos = new Float32Array(COUNT * 3);
+  const col = new Float32Array(COUNT * 3);
+
+  for (let i = 0; i < COUNT; i++){
+    pos[i*3]     = (Math.random() - 0.5) * 1900;
+    pos[i*3 + 1] = (Math.random() - 0.5) * 1100;
+    pos[i*3 + 2] = (Math.random() - 0.5) * 1000;
+
+    if (Math.random() > 0.93){
+      col[i*3] = 1.0; col[i*3+1] = 0.23; col[i*3+2] = 0.18;   // red sparks
+    } else {
+      const g = 0.35 + Math.random() * 0.55;
+      col[i*3] = g; col[i*3+1] = g; col[i*3+2] = g;
+    }
+  }
+
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
+
+  const mat = new THREE.PointsMaterial({
+    size: 2.4,
+    vertexColors: true,
+    transparent: true,
+    opacity: 0.9,
+    sizeAttenuation: true,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending
+  });
+
+  const points = new THREE.Points(geo, mat);
+  scene.add(points);
+
+  /* ---- Subtle wireframe geometry ---- */
+  const icoGeo = new THREE.IcosahedronGeometry(210, 1);
+  const icoMat = new THREE.MeshBasicMaterial({
+    color: 0xffffff, wireframe: true, transparent: true, opacity: 0.045
+  });
+  const ico = new THREE.Mesh(icoGeo, icoMat);
+  ico.position.set(230, -40, -180);
+  scene.add(ico);
+
+  const ico2 = new THREE.Mesh(
+    new THREE.IcosahedronGeometry(120, 1),
+    new THREE.MeshBasicMaterial({ color: 0xff3b2f, wireframe: true, transparent: true, opacity: 0.10 })
+  );
+  ico2.position.set(-320, 120, -260);
+  scene.add(ico2);
+
+  /* ---- Interaction ---- */
+  let mx = 0, my = 0, tRotX = 0, tRotY = 0;
+
+  window.addEventListener('mousemove', e => {
+    mx = (e.clientX / innerWidth - 0.5);
+    my = (e.clientY / innerHeight - 0.5);
+  });
+
+  window.addEventListener('resize', () => {
+    camera.aspect = innerWidth / innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(innerWidth, innerHeight);
+  });
+
+  /* Pause rendering when hero is off-screen */
+  let visible = true;
+  new IntersectionObserver(entries => {
+    visible = entries[0].isIntersecting;
+  }, { threshold: 0 }).observe(document.querySelector('.hero'));
+
+  let scrollY = 0;
+  window.addEventListener('scroll', () => { scrollY = window.scrollY; }, { passive:true });
+
+  const clock = new THREE.Clock();
+
+  (function animate(){
+    requestAnimationFrame(animate);
+    if (!visible) return;
+
+    const t = clock.getElapsedTime();
+
+    tRotY += (mx * 0.5 - tRotY) * 0.045;
+    tRotX += (my * 0.3 - tRotX) * 0.045;
+
+    points.rotation.y = t * 0.028 + tRotY;
+    points.rotation.x = tRotX * 0.6;
+
+    ico.rotation.y = t * 0.06;
+    ico.rotation.x = t * 0.03;
+    ico2.rotation.y = -t * 0.09;
+    ico2.rotation.z = t * 0.05;
+
+    camera.position.x = mx * 42;
+    camera.position.y = -my * 32 - scrollY * 0.05;
+    camera.lookAt(0, 0, 0);
+
+    mat.opacity = 0.75 + Math.sin(t * 0.8) * 0.12;
+
+    renderer.render(scene, camera);
+  })();
+})();
+
+
+/* ============================================================
+   10. CONTACT FORM
+   ============================================================ */
+document.getElementById('projectForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  const msg = document.getElementById('formMsg');
+  msg.classList.add('show');
+  this.reset();
+  setTimeout(() => msg.classList.remove('show'), 5200);
+});
+</script>
+
+</body>
+</html>
